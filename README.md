@@ -2,6 +2,8 @@
 
 [![Latest Version](https://shields.io/packagist/v/borschphp/mimetype.svg?style=flat-square)](https://packagist.org/packages/borschphp/mimetype)
 [![Software License](https://img.shields.io/badge/License-MIT-brightgreen.svg?style=flat-square)](https://github.com/borschphp/borsch-mimetype/blob/main/LICENSE.md)
+[![Build Status](https://scrutinizer-ci.com/g/borschphp/borsch-mimetype/badges/build.png?b=main)](https://scrutinizer-ci.com/g/borschphp/borsch-mimetype/build-status/main)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/borschphp/borsch-mimetype/badges/quality-score.png?b=main)](https://scrutinizer-ci.com/g/borschphp/borsch-mimetype/?branch=main)
 
 MimeType and MediaType implementation.
 
@@ -21,11 +23,12 @@ Easily create Mime Type for your requests:
 ```php
 use Borsch\MimeType\MimeType;
 use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Uri;
 
 $mime_type = new MimeType('application', 'json', ['charset' => 'UTF-8']);
 
-$request = (new Laminas\Diactoros\Request())
-    ->withUri(new Laminas\Diactoros\Uri('http://example.com'))
+$request = (new Request())
+    ->withUri(new Uri('http://example.com'))
     ->withMethod('GET')
     ->withAddedHeader('Content-Type', (string)$mime_type);
 ```
@@ -35,9 +38,10 @@ Or Media Type:
 ```php
 use Borsch\MimeType\MediaType;
 use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Uri;
 
-$request = (new Laminas\Diactoros\Request())
-    ->withUri(new Laminas\Diactoros\Uri('http://example.com'))
+$request = (new Request())
+    ->withUri(new Uri('http://example.com'))
     ->withMethod('GET')
     ->withAddedHeader('Content-Type', MediaType::APPLICATION_JSON);
 ```

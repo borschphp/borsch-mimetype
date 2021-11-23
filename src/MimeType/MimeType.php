@@ -91,7 +91,7 @@ class MimeType
 
         $type = substr($full_type, 0, $sub_index);
         $subtype = substr($full_type, $sub_index + 1);
-        if ($type == '*' && !$subtype == '*') {
+        if ($type == '*' && $subtype != '*') {
             throw new \InvalidArgumentException('Wildcard type is legal only in "*/*" (all mime types)');
         }
 
@@ -226,27 +226,29 @@ class MimeType
             return true;
         }
 
-        if ($this->type == $other->type) {
-            if ($this->subtype == $other->subtype) {
+        if ($this->type != $other->type) {
+            return false;
+        }
+
+        if ($this->subtype == $other->subtype) {
+            return true;
+        }
+
+        if ($this->isWildcardSubtype()) {
+            $position = strpos($this->subtype, '+');
+            if ($position === false) {
                 return true;
             }
 
-            if ($this->isWildcardSubtype()) {
-                $position = strpos($this->subtype, '+');
-                if ($position === false) {
+            $other_position = strpos($other->subtype, '+');
+
+            if ($other_position !== false) {
+                $subtype_without_suffix = substr($this->subtype, 0, $position);
+                $subtype_suffix = substr($this->subtype, $position + 1);
+                $other_subtype_suffix = substr($other->subtype, $other_position + 1);
+
+                if ($subtype_suffix == $other_subtype_suffix && $subtype_without_suffix == '*') {
                     return true;
-                }
-
-                $other_position = strpos($other->subtype, '+');
-
-                if ($other_position !== false) {
-                    $subtype_without_suffix = substr($this->subtype, 0, $position);
-                    $subtype_suffix = substr($this->subtype, $position + 1);
-                    $other_subtype_suffix = substr($other->subtype, $other_position + 1);
-
-                    if ($subtype_suffix == $other_subtype_suffix && $subtype_without_suffix == '*') {
-                        return true;
-                    }
                 }
             }
         }
@@ -269,29 +271,29 @@ class MimeType
             return true;
         }
 
-        if ($this->getType() == $other->getType()) {
-            if ($this->subtype == $other->subtype) {
-                return true;
-            }
+        if ($this->getType() != $other->getType()) {
+            return false;
+        }
 
-            if ($this->isWildcardSubtype() || $other->isWildcardSubtype()) {
-                if ($this->subtype == '*' || $other->subtype == '*') {
-                    return true;
-                }
+        if ($this->getSubtype() == $other->getSubtype()) {
+            return true;
+        }
 
-                $current_suffix = $this->getSubtypeSuffix();
-                $other_suffix = $other->getSubtypeSuffix();
+        if ($this->subtype == '*' || $other->subtype == '*') {
+            return true;
+        }
 
-                if ($this->isWildcardSubtype() && $current_suffix != null) {
-                    return $current_suffix == $other->subtype ||
-                        $current_suffix == $other_suffix;
-                }
+        $current_suffix = $this->getSubtypeSuffix();
+        $other_suffix = $other->getSubtypeSuffix();
 
-                if ($other->isWildcardSubtype() && $other_suffix != null) {
-                    return $this->subtype == $other_suffix ||
-                        $other_suffix == $current_suffix;
-                }
-            }
+        if ($this->isWildcardSubtype() && $current_suffix !== null) {
+            return $current_suffix == $other->subtype ||
+                $current_suffix == $other_suffix;
+        }
+
+        if ($other->isWildcardSubtype() && $other_suffix !== null) {
+            return $this->subtype == $other_suffix ||
+                $other_suffix == $current_suffix;
         }
 
         return false;
@@ -411,8 +413,7 @@ class MimeType
     protected function unquote(string $str): string
     {
         return $this->isQuotedString($str) ?
-            trim($str, '\'"') :
-            $str;
+            trim($str, '\'"') : $str;
     }
 
     /**
@@ -430,11 +431,7 @@ class MimeType
                 return false;
             }
 
-            if ($name == 'charset' && $this->charset != $other->charset) {
-                return false;
-            }
-
-            if ($value != $other->parameters[$name]) {
+            if ($name == 'charset' && $this->charset != $other->charset || $value != $other->parameters[$name]) {
                 return false;
             }
         }

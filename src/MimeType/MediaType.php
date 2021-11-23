@@ -44,7 +44,7 @@ class MediaType extends MimeType
     public function getQualityValue(): float
     {
         $quality = $this->getParameter('q');
-        return $quality != null ? (float)$this->unquote($quality) : 1.0;
+        return $quality !== null ? (float)$this->unquote($quality) : 1.0;
     }
 
     /**
