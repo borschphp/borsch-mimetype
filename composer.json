@@ -1,0 +1,29 @@
+{
+    "name": "borschphp/mimetype",
+    "description": "MimeType and MediaType implementation.",
+    "keywords": ["mimetype", "mediatype", "psr-7", "psr"],
+    "homepage": "https://github.com/borschphp/borsch-mimetype",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexandre Debusschère",
+            "email": "alexandre@kosmonaft.dev"
+        }
+    ],
+    "require": {
+        "php": "^7.2 || ^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Borsch\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BorschTest\\": "tests/"
+        }
+    }
+}
