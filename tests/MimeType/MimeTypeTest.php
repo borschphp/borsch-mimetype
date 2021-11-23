@@ -143,6 +143,18 @@ class MimeTypeTest extends TestCase
         $this->assertTrue($mime_type->isCompatibleWith(new MimeType('text', 'plain')));
     }
 
+    public function testWildcardIsCompatibleWithSubtypeSuffix()
+    {
+        $mime_type = new MimeType('application', '*+problem');
+        $this->assertTrue($mime_type->isCompatibleWith(new MimeType('application', 'json+problem')));
+    }
+
+    public function testWildcardIsCompatibleWithSubtypeSuffixReverse()
+    {
+        $mime_type = new MimeType('application', 'json+problem');
+        $this->assertTrue($mime_type->isCompatibleWith(new MimeType('application', '*+problem')));
+    }
+
     public function testApplicationIsNotCompatibleWithTextPlain()
     {
         $mime_type = new MimeType('application', 'json');

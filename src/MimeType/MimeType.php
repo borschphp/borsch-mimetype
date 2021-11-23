@@ -67,7 +67,7 @@ class MimeType
     public static function createFromString(string $mimetype): MimeType
     {
         if (!strlen($mimetype)) {
-            throw new \InvalidArgumentException('Provided MimeType must not be empty.');
+            throw new \InvalidArgumentException('Provided MimeType cannot be empty.');
         }
 
         $index = strpos($mimetype, ';');
@@ -267,36 +267,17 @@ class MimeType
      */
     public function isCompatibleWith(MimeType $other): bool
     {
-        if ($this->isWildcardType() || $other->isWildcardType()) {
-            return true;
+        $pattern = sprintf('%s/%s', $this->getType(), $this->getSubtype());
+        $filename = sprintf('%s/%s', $other->getType(), $other->getSubtype());
+
+        if (!$this->isWildcardSubtype() && $other->isWildcardSubtype()) {
+            // fnmatch does not work if wildcard is placed on second parameter, so we swap
+            $swap = $pattern;
+            $pattern = $filename;
+            $filename = $swap;
         }
 
-        if ($this->getType() != $other->getType()) {
-            return false;
-        }
-
-        if ($this->getSubtype() == $other->getSubtype()) {
-            return true;
-        }
-
-        if ($this->subtype == '*' || $other->subtype == '*') {
-            return true;
-        }
-
-        $current_suffix = $this->getSubtypeSuffix();
-        $other_suffix = $other->getSubtypeSuffix();
-
-        if ($this->isWildcardSubtype() && $current_suffix !== null) {
-            return $current_suffix == $other->subtype ||
-                $current_suffix == $other_suffix;
-        }
-
-        if ($other->isWildcardSubtype() && $other_suffix !== null) {
-            return $this->subtype == $other_suffix ||
-                $other_suffix == $current_suffix;
-        }
-
-        return false;
+        return fnmatch($pattern, $filename);
     }
 
     /**
