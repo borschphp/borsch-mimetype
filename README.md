@@ -3,6 +3,7 @@
 [![Latest Version](https://shields.io/packagist/v/borschphp/mimetype.svg?style=flat-square)](https://packagist.org/packages/borschphp/mimetype)
 [![Software License](https://img.shields.io/badge/License-MIT-brightgreen.svg?style=flat-square)](https://github.com/borschphp/borsch-mimetype/blob/main/LICENSE.md)
 [![build](https://github.com/borschphp/borsch-mimetype/actions/workflows/php.yml/badge.svg)](https://github.com/borschphp/borsch-mimetype/actions/workflows/php.yml)
+[![Code Coverage](https://scrutinizer-ci.com/g/borschphp/borsch-mimetype/badges/coverage.png?b=main)](https://scrutinizer-ci.com/g/borschphp/borsch-mimetype/?branch=main)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/borschphp/borsch-mimetype/badges/quality-score.png?b=main)](https://scrutinizer-ci.com/g/borschphp/borsch-mimetype/?branch=main)
 
 MimeType and MediaType implementation.
