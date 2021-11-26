@@ -155,6 +155,6 @@ class MimeType extends BaseType
             }
         }
 
-        return true;
+        return true; // @codeCoverageIgnore
     }
 }

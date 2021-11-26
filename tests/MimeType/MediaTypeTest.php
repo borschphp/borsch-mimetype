@@ -63,6 +63,12 @@ class MediaTypeTest extends TestCase
         $this->assertArrayNotHasKey('q', $media_type->removeQualityValue()->getParameters());
     }
 
+    public function testRemoveQualityValueWithoutQualityValueReturnCurrentInstance()
+    {
+        $media_type = new MediaType('image', 'jpeg');
+        $this->assertEquals($media_type, $media_type->removeQualityValue());
+    }
+
     public function testValidateParametersWithQualityHigherThanOneThrowsException()
     {
         $this->expectException(\InvalidArgumentException::class);

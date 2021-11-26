@@ -13,6 +13,42 @@ use PHPUnit\Framework\TestCase;
 class MimeTypeTest extends TestCase
 {
 
+    public function testConstructorWithEmptyType()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new MimeType('', 'json');
+    }
+
+    public function testConstructorWithEmptySubtype()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new MimeType('application', '');
+    }
+
+    public function testConstructorWithInvalidType()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new MimeType('application[]', 'json');
+    }
+
+    public function testConstructorWithInvalidSubtype()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new MimeType('application', 'json{}');
+    }
+
+    public function testConstructorWithInvalidParameterName()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new MimeType('application', 'json', ['' => 'utf8']);
+    }
+
+    public function testConstructorWithInvalidParameterValue()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new MimeType('application', 'json', ['charset' => '']);
+    }
+
     public function testIsWildcardType()
     {
         $mime_type = new MimeType();
@@ -129,6 +165,22 @@ class MimeTypeTest extends TestCase
         $this->assertEquals('utf-8', $instance->getParameter('charset'));
         $this->assertEquals('3d6b6a416f9b5', $instance->getParameter('boundary'));
         $this->assertEquals('some_file', $instance->getParameter('name'));
+    }
+
+    public function testCreateFromStringWithMissingTypes()
+    {
+        $mime_type = 'application;charset=utf-8';
+
+        $this->expectException(\InvalidArgumentException::class);
+        MimeType::createFromString($mime_type);
+    }
+
+    public function testCreateFromStringWithIllegalWildcard()
+    {
+        $mime_type = '*/json;charset=utf-8';
+
+        $this->expectException(\InvalidArgumentException::class);
+        MimeType::createFromString($mime_type);
     }
 
     public function testTextIsCompatibleWithTextPlain()

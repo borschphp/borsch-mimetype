@@ -197,7 +197,7 @@ class BaseType
     private function isQuotedString(string $str): bool
     {
         if (strlen($str) < 2) {
-            return false;
+            return false; // @codeCoverageIgnore
         }
 
         return (substr($str, 0, 1) == '"' && substr($str, -1) == '"') ||
