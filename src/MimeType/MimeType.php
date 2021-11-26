@@ -25,12 +25,7 @@ class MimeType
     private $charset;
 
     /** @var string[] */
-    private $character_set = [
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        '(', ')', '<', '>', '@', ',', ';', ':', '\\', '\"', '/', '[', ']', '?', '=', '{', '}', ' ', '\t', '*', '+', '-', '_', '.'
-    ];
+    private $character_set = [];
 
     /**
      * @param string $type
@@ -47,6 +42,8 @@ class MimeType
             throw new \InvalidArgumentException('Parameter "subtype" must not be empty.');
         }
 
+        $this->setCharacterSet();
+
         $this->ValidateType($type);
         $this->ValidateType($subtype);
 
@@ -58,6 +55,54 @@ class MimeType
         }
 
         $this->parameters = $parameters;
+    }
+
+    /**
+     * Character set as defined in RFC 2616 section 2.2.
+     *
+     * Basically, 1*<any CHAR except CTLs or separators>.
+     *
+     * CTL = <any US-ASCII control character (octets 0 - 31) and DEL (127)>
+     * separators = "(" | ")" | "<" | ">" | "@" | "," | ";" | ":" | "\" | <"> | "/" | "[" | "]" | "?" | "=" |
+     * "{" | "}" | SP | HT
+     * SP = <US-ASCII SP, space (32)>
+     * HT = <US-ASCII HT, horizontal-tab (9)>
+     *
+     * @return void
+     * @see https://datatracker.ietf.org/doc/html/rfc2616#section-2.2
+     */
+    private function setCharacterSet()
+    {
+        $exceptions = array_merge(
+            range(0, 31), // CTLs
+            [127], // CTL
+            array_map('ord', [ // separators
+                '(',
+                ')',
+                '<',
+                '>',
+                '@',
+                ',',
+                ';',
+                ':',
+                '\'',
+                '"',
+                '/',
+                '[',
+                ']',
+                '?',
+                '=',
+                '{',
+                '}'
+            ]),
+            [32, 9] // separators
+        );
+
+        for ($i = 0; $i <= 127; $i += 1) {
+            if (!in_array($i, $exceptions)) {
+                $this->character_set[] = $i;
+            }
+        }
     }
 
     /**
@@ -293,7 +338,7 @@ class MimeType
     private function validateType(string $type): void
     {
         foreach (str_split($type) as $char) {
-            if (!in_array($char, $this->character_set)) {
+            if (!in_array(ord($char), $this->character_set)) {
                 throw new \InvalidArgumentException(sprintf(
                     'Invalid character "%s" in (sub)type "%s".',
                     $char,
