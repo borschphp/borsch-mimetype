@@ -19,10 +19,6 @@ jobs:
     steps:
     - name: Setup PHP
       uses: actions/checkout@v2
-      with:
-        php-version: ${{ matrix.php-versions }}
-        coverage: xdebug
-        tools: phpunit:${{ matrix.phpunit-versions }}
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
