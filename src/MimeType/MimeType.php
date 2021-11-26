@@ -134,10 +134,8 @@ class MimeType
         }
 
         foreach ($parts as $part) {
-            if (strpos($part, '=') >= 1) {
-                [$key, $value] = explode('=', $part);
-                $parameters[$key] = $value;
-            }
+            [$key, $value] = explode('=', $part);
+            $parameters[$key] = $value;
         }
 
         return new MimeType($type, $subtype, $parameters);
