@@ -70,43 +70,27 @@ class MimeType
             throw new \InvalidArgumentException('Provided MimeType cannot be empty.');
         }
 
-        $index = strpos($mimetype, ';');
-        $full_type = trim($index !== false ? substr($mimetype, 0, $index) : $mimetype);
+        $parts = explode(';', $mimetype);
+        $parts = array_map('trim', $parts);
 
-        if (!strlen($full_type)) {
-            throw new \InvalidArgumentException('MimeType must not be empty.');
+        $types = array_shift($parts);
+        $parameters = [];
+
+        $types = explode('/', $types);
+        if (count($types) != 2) {
+            throw new \InvalidArgumentException('MimeType does not have a type or subtype.');
         }
 
-        if ($full_type == '*') {
-            $full_type = '*/*';
-        }
+        $type = $types[0];
+        $subtype = $types[1];
 
-        $sub_index = strpos($full_type, '/');
-        if ($sub_index === false) {
-            throw new \InvalidArgumentException('Provided MimeType does not contain "/".');
-        }
-        if ($sub_index == strlen($full_type) - 1) {
-            throw new \InvalidArgumentException('Provided MimeType does not contain subtype after "/".');
-        }
-
-        $type = substr($full_type, 0, $sub_index);
-        $subtype = substr($full_type, $sub_index + 1);
         if ($type == '*' && $subtype != '*') {
             throw new \InvalidArgumentException('Wildcard type is legal only in "*/*" (all mime types)');
         }
 
-        $parameters = [];
-        if ($index < strlen($mimetype)) {
-            $params = explode(';', substr($mimetype, $index + 1));
-            foreach ($params as $param) {
-                $key_value = explode('=', $param);
-                if (count($key_value) != 2) {
-                    continue;
-                }
-
-                $key = trim($key_value[0]);
-                $value = trim($key_value[1]);
-
+        foreach ($parts as $part) {
+            if (strpos($part, '=') >= 1) {
+                [$key, $value] = explode('=', $part);
                 $parameters[$key] = $value;
             }
         }
@@ -222,38 +206,10 @@ class MimeType
      */
     public function includes(MimeType $other): bool
     {
-        if ($this->isWildcardType()) {
-            return true;
-        }
+        $pattern = sprintf('%s/%s', $this->getType(), $this->getSubtype());
+        $filename = sprintf('%s/%s', $other->getType(), $other->getSubtype());
 
-        if ($this->type != $other->type) {
-            return false;
-        }
-
-        if ($this->subtype == $other->subtype) {
-            return true;
-        }
-
-        if ($this->isWildcardSubtype()) {
-            $position = strpos($this->subtype, '+');
-            if ($position === false) {
-                return true;
-            }
-
-            $other_position = strpos($other->subtype, '+');
-
-            if ($other_position !== false) {
-                $subtype_without_suffix = substr($this->subtype, 0, $position);
-                $subtype_suffix = substr($this->subtype, $position + 1);
-                $other_subtype_suffix = substr($other->subtype, $other_position + 1);
-
-                if ($subtype_suffix == $other_subtype_suffix && $subtype_without_suffix == '*') {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return fnmatch($pattern, $filename);
     }
 
     /**
@@ -408,11 +364,7 @@ class MimeType
         }
 
         foreach ($this->parameters as $name => $value) {
-            if (!isset($other->parameters[$name])) {
-                return false;
-            }
-
-            if ($name == 'charset' && $this->charset != $other->charset || $value != $other->parameters[$name]) {
+            if (!isset($other->parameters[$name]) || $value != $other->parameters[$name]) {
                 return false;
             }
         }
